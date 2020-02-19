@@ -1,12 +1,11 @@
 import os
 
 import requests
-from flask import Flask, request, render_template, jsonify
+from flask import current_app, request, render_template, jsonify, Blueprint
 
-app = Flask(__name__)
+webhook = Blueprint('webhook', __name__)
 
-
-@app.route('/', methods=['POST'])
+@webhook.route('/', methods=['POST'])
 def receive_notification():
     statuspage_data = request.get_json()
     slack_message = render_template('component_update.json', **statuspage_data)
@@ -15,7 +14,7 @@ def receive_notification():
 
 
 def post_message_to_slack(slack_message):
-    webhook_url = os.getenv('SLACK_WEBHOOK_URL')
+    webhook_url = current_app.config.get('SLACK_WEBHOOK_URL')
 
     response = requests.post(
         webhook_url, data=slack_message,
