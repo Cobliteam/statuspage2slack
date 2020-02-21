@@ -7,3 +7,17 @@ class ComponentStatus(Enum):
     PARTIAL_OUTAGE = 'partial_outage'
     MAJOR_OUTAGE = 'major_outage'
     UNDER_MAINTENANCE = 'under_maintenance'
+
+
+class IncidentStatus(Enum):
+    INVESTIGATING = 'investigating'
+    IDENTIFIED = 'identified'
+    MONITORING = 'monitoring'
+    RESOLVED = 'resolved'
+
+
+class IncidentImpactOverride(Enum):
+    NONE = None
+    MINOR = 'minor'
+    MAJOR = 'major'
+    CRITICAL = 'critical'

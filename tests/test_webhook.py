@@ -1,17 +1,15 @@
-import json
-
 import pytest
 import responses
 from faker import Faker
 from flask import Response, Flask
 from flask.testing import FlaskClient
-from requests import PreparedRequest
 
-from statuspage2slack.statuspage_constants import ComponentStatus
+from statuspage2slack.statuspage_constants import ComponentStatus, \
+    IncidentStatus, IncidentImpactOverride
 
 fake = Faker()
 
-STATUSPAGE_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%SZ'
+STATUSPAGE_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
 @pytest.fixture
@@ -38,29 +36,57 @@ def component_update_request(old_component_status, new_component_status):
     }
 
 
-def is_json(some_string):
-    try:
-        json.loads(some_string)
-    except ValueError:
-        return False
-    return True
+@pytest.fixture
+def incident_update_request(incident_update, incident_impact, incident_status):
+    creation_datetime = fake.past_datetime()
+    monitoring_datetime = fake.past_datetime(start_date=creation_datetime)
+    resolved_datetime = fake.past_datetime(start_date=creation_datetime)
+    update_datetime = fake.past_datetime(start_date=creation_datetime)
+
+    name = fake.sentence(nb_words=6, variable_nb_words=True,
+                         ext_word_list=None)
+
+    return {
+        "incident": {
+            "backfilled": False,
+            "created_at":
+                creation_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
+            "impact": "critical",
+            "impact_override": incident_impact.value,
+            "monitoring_at":
+                monitoring_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
+            "resolved_at":
+                resolved_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
+            "shortlink": fake.url(),
+            "status": incident_status.value,
+            "updated_at": update_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
+            "name": name,
+            "incident_updates": [incident_update]
+        }
+    }
+
+
+@pytest.fixture()
+def incident_update(incident_status):
+    body = fake.paragraphs()
+    creation_datetime = fake.past_datetime()
+    display_datetime = fake.past_datetime(start_date=creation_datetime)
+    update_datetime = fake.past_datetime(start_date=creation_datetime)
+
+    return {
+        "body": body,
+        "created_at": creation_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
+        "display_at": display_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
+        "status": incident_status.value,
+        "updated_at": update_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
+    }
 
 
 @pytest.mark.parametrize("old_component_status", ComponentStatus)
 @pytest.mark.parametrize("new_component_status", ComponentStatus)
-def test_component_update(flask_app: Flask, flask_client: FlaskClient,
+def test_component_update(flask_client: FlaskClient,
                           component_update_request, used_templates,
                           request_mocker: responses.RequestsMock):
-    def assert_request(request: PreparedRequest):
-        assert request.body
-        assert is_json(request.body)
-
-        return 200, {}, 'ok'
-
-    request_mocker.add_callback(responses.POST,
-                                flask_app.config.get('SLACK_WEBHOOK_URL'),
-                                callback=assert_request)
-
     response: Response = flask_client.post('/', json=component_update_request)
 
     assert 200 <= response.status_code < 300
@@ -68,6 +94,48 @@ def test_component_update(flask_app: Flask, flask_client: FlaskClient,
     assert len(used_templates) == 1
     (template, context) = used_templates.pop()
     assert template.name == 'component_update.json'
-    assert context['component_update'] == \
-           component_update_request['component_update']
-    assert context['component'] == component_update_request['component']
+    component_update = component_update_request['component_update']
+    component = component_update_request['component']
+    assert context['component_update'] == component_update
+    assert context['component'] == component
+
+
+@pytest.mark.parametrize("incident_status", IncidentStatus)
+@pytest.mark.parametrize("incident_impact", IncidentImpactOverride)
+def test_incident_update(flask_client: FlaskClient, incident_update_request,
+                         used_templates,
+                         request_mocker: responses.RequestsMock):
+    response: Response = flask_client.post('/', json=incident_update_request)
+
+    assert 200 <= response.status_code < 300
+
+    assert len(used_templates) == 1
+    (template, context) = used_templates.pop()
+    assert template.name == 'incident_update.json'
+    assert context['incident'] == incident_update_request['incident']
+
+
+def test_invalid_request(flask_client: FlaskClient):
+    response: Response = flask_client.post('/', data='dummy')
+    assert 400 <= response.status_code < 500
+
+
+@pytest.mark.parametrize("old_component_status",
+                         [ComponentStatus.DEGRADED_PERFORMANCE])
+@pytest.mark.parametrize("new_component_status", [ComponentStatus.OPERATIONAL])
+@pytest.mark.parametrize("incident_status", [IncidentStatus.MONITORING])
+@pytest.mark.parametrize("incident_impact", [IncidentStatus.RESOLVED])
+def test_disable_messages(flask_app: Flask, flask_client: FlaskClient,
+                          component_update_request, incident_update_request,
+                          used_templates):
+    flask_app.config.update({
+        'COMPONENT_MESSAGES_ENABLED': False,
+        'INCIDENT_MESSAGES_ENABLED': False
+    })
+    response: Response = flask_client.post('/', json=incident_update_request)
+    assert 200 <= response.status_code < 300
+    assert len(used_templates) == 0
+
+    response: Response = flask_client.post('/', json=component_update_request)
+    assert 200 <= response.status_code < 300
+    assert len(used_templates) == 0

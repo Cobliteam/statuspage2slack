@@ -1,0 +1,28 @@
+{% set incident_statuses = ({
+  "investigating": "being investigation",
+  "identified": "identified",
+  "monitoring": "under monitoring",
+  "resolved": "resolved"
+})	%}
+{
+  "username": "statuspage",
+  "blocks": [
+      {
+          "type": "section",
+          "text": {
+              "type": "plain_text",
+              "text": "{{incident.name}} is {{incident_statuses[incident.status]}}"
+          }
+      },
+      {
+          "type": "divider"
+      },
+      {
+          "type": "section",
+          "text": {
+              "type": "plain_text",
+              "text": "{{incident.incident_updates[0].body}}"
+          }
+      }
+  ]
+}

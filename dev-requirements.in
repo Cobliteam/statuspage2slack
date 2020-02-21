@@ -3,3 +3,4 @@ pytest
 responses
 blinker
 Faker
+flake8
