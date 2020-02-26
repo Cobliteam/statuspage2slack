@@ -42,12 +42,12 @@ def receive_notification():
     request_type = discover_request_type(statuspage_data)
     send_message = False
     if request_type == RequestType.INCIDENT_UPDATE:
-        if current_app.config.get('COMPONENT_MESSAGES_ENABLED'):
+        if current_app.config.get('INCIDENT_MESSAGES_ENABLED'):
             slack_message = render_template('incident_update.json',
                                             **statuspage_data)
             send_message = True
     elif request_type == RequestType.COMPONENT_UPDATE:
-        if current_app.config.get('INCIDENT_MESSAGES_ENABLED'):
+        if current_app.config.get('COMPONENT_MESSAGES_ENABLED'):
             slack_message = render_template('component_update.json',
                                             **statuspage_data)
             send_message = True
