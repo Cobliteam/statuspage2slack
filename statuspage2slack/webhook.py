@@ -2,6 +2,7 @@ import http
 from enum import Enum, auto
 
 import requests
+from dateutil import parser as datetime_parser
 from flask import current_app, request, render_template, Blueprint
 
 webhook = Blueprint('webhook', __name__)
@@ -34,6 +35,12 @@ def post_message_to_slack(slack_message):
             'Request to slack returned an error %s, the response is:\n%s'
             % (response.status_code, response.text)
         )
+
+
+@webhook.app_template_filter()
+def to_timestamp(date):
+    date = datetime_parser.isoparse(date)
+    return str(int(date.timestamp()))
 
 
 @webhook.route('/', methods=['POST'])
