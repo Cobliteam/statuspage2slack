@@ -28,7 +28,7 @@ pycodestyle==2.5.0        # via flake8
 pyflakes==2.1.1           # via flake8
 pyparsing==2.4.6          # via packaging
 pytest==5.3.5
-python-dateutil==2.6.1    # via faker
+python-dateutil==2.8.1
 python-dotenv==0.11.0
 requests==2.22.0
 responses==0.10.9

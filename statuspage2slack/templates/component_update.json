@@ -6,6 +6,6 @@
   "under_maintenance": "under maintenance"
 })	-%}
 {
-  "username": "statuspage",
+  "username": "IncidentBot",
   "text": "{{ component.name }} is {{component_statuses[component.status]}}"
 }

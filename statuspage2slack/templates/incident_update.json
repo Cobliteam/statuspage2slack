@@ -1,28 +1,51 @@
-{% set incident_statuses = ({
-  "investigating": "being investigation",
-  "identified": "identified",
-  "monitoring": "under monitoring",
-  "resolved": "resolved"
-})	%}
 {
-  "username": "statuspage",
+  "username": "IncidentBot",
   "blocks": [
       {
           "type": "section",
           "text": {
-              "type": "plain_text",
-              "text": "{{incident.name}} is {{incident_statuses[incident.status]}}"
+              "type": "mrkdwn",
+              "text":
+{% if incident.status == "investigating" %}
+  ":fire: {{incident.name|trim('. ')}} is under investigation :fire:"
+{% elif incident.status == "identified" %}
+  ":dart: {{incident.name|trim('. ')}} is identified :dart:"
+{% elif incident.status == "monitoring" %}
+  ":face_with_monocle: {{incident.name|trim('. ')}} is under monitoring :face_with_monocle:"
+{% elif incident.status == "resolved" %}
+  ":heavy_check_mark: {{incident.name|trim('. ')}} is resolved :heavy_check_mark:"
+{% else %}
+  "{{incident.name}}"
+{% endif %}
           }
-      },
-      {
-          "type": "divider"
       },
       {
           "type": "section",
+          "fields": [
+            {
+			  "type": "mrkdwn",
+			  "text": "*Created:*\n<!date^{{incident.created_at|to_timestamp}}^{date} {time}|{{incident.created_at}}>"
+			},
+			{
+			  "type": "mrkdwn",
+			  "text": "*Updated:*\n<!date^{{incident.updated_at|to_timestamp}}^{date} {time}|{{incident.updated_at}}>"
+			},
+			{
+			  "type": "mrkdwn",
+			  "text": "*Impact:*\n{{incident.impact}}"
+			},
+			{
+			  "type": "mrkdwn",
+			  "text": "*<{{incident.shortlink}}|Link>*"
+			}
+          ],
           "text": {
-              "type": "plain_text",
+              "type": "mrkdwn",
               "text": "{{incident.incident_updates[0].body}}"
           }
+      },
+      {
+        "type": "divider"
       }
   ]
 }
