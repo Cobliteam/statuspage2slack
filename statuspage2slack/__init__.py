@@ -1,4 +1,7 @@
-from dotenv import dotenv_values
+import os
+
+import jinja2
+from dotenv import load_dotenv
 from flask import Flask
 
 from statuspage2slack.webhook import webhook
@@ -7,16 +10,16 @@ from statuspage2slack.webhook import webhook
 class Config(object):
 
     def __init__(self):
-        self.env_values = dotenv_values()
+        load_dotenv()
 
     def __truthy(self, key, default=True):
-        if key in self.env_values:
-            return self.env_values[key].strip().lower() == 'true'
+        if key in os.environ:
+            return os.getenv(key).strip().lower() == 'true'
         return default
 
     @property
     def SLACK_WEBHOOK_URL(self):
-        return self.env_values.get('SLACK_WEBHOOK_URL', None)
+        return os.getenv('SLACK_WEBHOOK_URL', None)
 
     @property
     def COMPONENT_MESSAGES_ENABLED(self):
@@ -26,10 +29,18 @@ class Config(object):
     def INCIDENT_MESSAGES_ENABLED(self):
         return self.__truthy('INCIDENT_MESSAGES_ENABLED')
 
+    @property
+    def TEMPLATE_FOLDER(self):
+        return os.getenv('TEMPLATE_FOLDER', os.getcwd() + '/templates')
+
 
 def create_app():
+    config = Config()
     app = Flask(__name__)
-    app.config.from_object(Config())
+
+    app.jinja_loader.searchpath.insert(0, config.TEMPLATE_FOLDER)
+
+    app.config.from_object(config)
     app.register_blueprint(webhook)
     return app
 

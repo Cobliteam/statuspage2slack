@@ -1,3 +1,5 @@
+import os
+
 import pytest
 import responses
 from faker import Faker
@@ -10,6 +12,9 @@ from statuspage2slack.statuspage_constants import ComponentStatus, \
 fake = Faker()
 
 STATUSPAGE_DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
+test_file_path = os.path.realpath(__file__)
+test_file_folder = os.path.dirname(test_file_path)
 
 
 @pytest.fixture
@@ -144,3 +149,23 @@ def test_false_enabled_flags(flask_app: Flask, flask_client: FlaskClient,
 
     assert 200 <= response.status_code < 300
     assert len(used_templates) == 0
+
+
+@pytest.mark.parametrize("incident_status", [IncidentStatus.MONITORING])
+@pytest.mark.parametrize("incident_impact", [IncidentStatus.RESOLVED])
+@pytest.mark.parametrize("env_dict", [
+    {'TEMPLATE_FOLDER': test_file_folder + '/templates'}
+])
+def test_change_template_folder(change_env, flask_client: FlaskClient,
+                                incident_update_request, used_templates,
+                                request_mocker: responses.RequestsMock,
+                                env_dict):
+    template_name = 'incident_update.json'
+    response: Response = flask_client.post('/', json=incident_update_request)
+    assert 200 <= response.status_code < 300
+
+    assert len(used_templates) == 1
+    (template, context) = used_templates.pop()
+    assert template.name == template_name
+    assert os.path.realpath(template.filename) == os.path.realpath(
+        env_dict['TEMPLATE_FOLDER'] + '/' + template_name)
