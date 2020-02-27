@@ -9,6 +9,7 @@ setup(
     install_requires=[
         'Flask',
         'python-dotenv',
-        'requests'
+        'requests',
+        'python-dateutil>=2.7'
     ],
 )

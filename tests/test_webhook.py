@@ -68,7 +68,7 @@ def incident_update_request(incident_update, incident_impact, incident_status):
 
 @pytest.fixture()
 def incident_update(incident_status):
-    body = fake.paragraphs()
+    body = fake.paragraph()
     creation_datetime = fake.past_datetime()
     display_datetime = fake.past_datetime(start_date=creation_datetime)
     update_datetime = fake.past_datetime(start_date=creation_datetime)
