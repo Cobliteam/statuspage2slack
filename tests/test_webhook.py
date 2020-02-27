@@ -129,7 +129,7 @@ def test_invalid_request(flask_client: FlaskClient):
                          [ComponentStatus.DEGRADED_PERFORMANCE])
 @pytest.mark.parametrize("new_component_status", [ComponentStatus.OPERATIONAL])
 @pytest.mark.parametrize("incident_status", [IncidentStatus.MONITORING])
-@pytest.mark.parametrize("incident_impact", [IncidentStatus.RESOLVED])
+@pytest.mark.parametrize("incident_impact", [IncidentImpactOverride.MAJOR])
 @pytest.mark.parametrize("flag", ['COMPONENT_MESSAGES_ENABLED',
                                   'INCIDENT_MESSAGES_ENABLED'])
 def test_false_enabled_flags(flask_app: Flask, flask_client: FlaskClient,
@@ -152,7 +152,7 @@ def test_false_enabled_flags(flask_app: Flask, flask_client: FlaskClient,
 
 
 @pytest.mark.parametrize("incident_status", [IncidentStatus.MONITORING])
-@pytest.mark.parametrize("incident_impact", [IncidentStatus.RESOLVED])
+@pytest.mark.parametrize("incident_impact", [IncidentImpactOverride.CRITICAL])
 @pytest.mark.parametrize("env_dict", [
     {'TEMPLATE_FOLDER': test_file_folder + '/templates'}
 ])
