@@ -136,9 +136,11 @@ def test_false_enabled_flags(flask_app: Flask, flask_client: FlaskClient,
     if flag == 'INCIDENT_MESSAGES_ENABLED':
         response: Response = flask_client.post('/',
                                                json=incident_update_request)
-    else:
+    elif flag == 'COMPONENT_MESSAGES_ENABLED':
         response: Response = flask_client.post('/',
                                                json=component_update_request)
+    else:
+        assert False, "Unexpected flag value"
 
     assert 200 <= response.status_code < 300
     assert len(used_templates) == 0
