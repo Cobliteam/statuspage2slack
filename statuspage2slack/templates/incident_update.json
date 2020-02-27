@@ -11,7 +11,7 @@
 {% elif incident.status == "identified" %}
   ":dart: {{incident.name|trim('. ')}} is identified :dart:"
 {% elif incident.status == "monitoring" %}
-  ":face_with_monocle: {{incident.name|trim('. ')}} is under monitoring :face_with_monocle:"
+  ":chart_with_upwards_trend: {{incident.name|trim('. ')}} is under monitoring :chart_with_upwards_trend:"
 {% elif incident.status == "resolved" %}
   ":heavy_check_mark: {{incident.name|trim('. ')}} is resolved :heavy_check_mark:"
 {% else %}
