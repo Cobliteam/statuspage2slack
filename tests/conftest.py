@@ -10,6 +10,11 @@ from statuspage2slack import create_app
 
 
 @pytest.fixture
+def change_env(monkeypatch, env_dict: dict):
+    for key, value in env_dict.items():
+        monkeypatch.setenv(key, value)
+
+@pytest.fixture
 def flask_app() -> Flask:
     app = create_app()
     app.config['TESTING'] = True
