@@ -125,17 +125,22 @@ def test_invalid_request(flask_client: FlaskClient):
 @pytest.mark.parametrize("new_component_status", [ComponentStatus.OPERATIONAL])
 @pytest.mark.parametrize("incident_status", [IncidentStatus.MONITORING])
 @pytest.mark.parametrize("incident_impact", [IncidentStatus.RESOLVED])
-def test_disable_messages(flask_app: Flask, flask_client: FlaskClient,
-                          component_update_request, incident_update_request,
-                          used_templates):
+@pytest.mark.parametrize("flag", ['COMPONENT_MESSAGES_ENABLED',
+                                  'INCIDENT_MESSAGES_ENABLED'])
+def test_false_enabled_flags(flask_app: Flask, flask_client: FlaskClient,
+                             component_update_request, incident_update_request,
+                             used_templates, flag):
     flask_app.config.update({
-        'COMPONENT_MESSAGES_ENABLED': False,
-        'INCIDENT_MESSAGES_ENABLED': False
+        flag: False
     })
-    response: Response = flask_client.post('/', json=incident_update_request)
-    assert 200 <= response.status_code < 300
-    assert len(used_templates) == 0
+    if flag == 'INCIDENT_MESSAGES_ENABLED':
+        response: Response = flask_client.post('/',
+                                               json=incident_update_request)
+    elif flag == 'COMPONENT_MESSAGES_ENABLED':
+        response: Response = flask_client.post('/',
+                                               json=component_update_request)
+    else:
+        assert False, "Unexpected flag value"
 
-    response: Response = flask_client.post('/', json=component_update_request)
     assert 200 <= response.status_code < 300
     assert len(used_templates) == 0
