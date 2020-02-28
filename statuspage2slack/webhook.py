@@ -1,14 +1,12 @@
 import http
 import os
-from copy import copy
 from enum import Enum, auto
+from shutil import copytree
 
 import click
 import requests
-from shutil import copytree
 from dateutil import parser as datetime_parser
 from flask import current_app, request, render_template, Blueprint
-
 
 webhook = Blueprint('webhook', __name__)
 
