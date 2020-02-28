@@ -1,4 +1,6 @@
 import os
+import tempfile
+from shutil import rmtree
 
 import pytest
 import responses
@@ -169,3 +171,10 @@ def test_change_template_folder(change_env, flask_client: FlaskClient,
     assert template.name == template_name
     assert os.path.realpath(template.filename) == os.path.realpath(
         env_dict['TEMPLATE_FOLDER'] + '/' + template_name)
+
+
+def test_copy_templates(flask_app: Flask):
+    runner = flask_app.test_cli_runner()
+    folder = tempfile.gettempdir() + '/templates/'
+    rmtree(folder, ignore_errors=True)
+    result = runner.invoke(args=['webhook', 'copy-templates', folder])
