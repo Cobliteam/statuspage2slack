@@ -27,7 +27,7 @@ def post_message_to_slack(slack_message):
     webhook_url = current_app.config.get('SLACK_WEBHOOK_URL')
 
     response = requests.post(
-        webhook_url, data=slack_message,
+        webhook_url, data=slack_message.encode("utf-8"),
         headers={'Content-Type': 'application/json'}
     )
     if response.status_code != 200:
