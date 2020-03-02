@@ -16,8 +16,9 @@ class IncidentStatus(Enum):
     RESOLVED = 'resolved'
 
 
-class IncidentImpactOverride(Enum):
+class IncidentImpact(Enum):
     NONE = None
     MINOR = 'minor'
     MAJOR = 'major'
     CRITICAL = 'critical'
+    MAINTENANCE = 'maintenance'

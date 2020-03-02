@@ -1,3 +1,10 @@
+{% set incident_impact_statuses = ({
+  "minor": "minor",
+  "major": "major",
+  "critical": "critical",
+  "maintenance": "maintenance",
+  None: "none"
+})	-%}
 {
   "username": "IncidentBot",
   "blocks": [
@@ -32,7 +39,7 @@
 			},
 			{
 			  "type": "mrkdwn",
-			  "text": "*Impact:*\n{{incident.impact}}"
+			  "text": "*Impact:*\n{{incident_impact_statuses[incident.impact]}}"
 			},
 			{
 			  "type": "mrkdwn",

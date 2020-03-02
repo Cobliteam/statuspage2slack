@@ -7,7 +7,7 @@ from flask import Response, Flask
 from flask.testing import FlaskClient
 
 from statuspage2slack.statuspage_constants import ComponentStatus, \
-    IncidentStatus, IncidentImpactOverride
+    IncidentStatus, IncidentImpact
 
 fake = Faker()
 
@@ -56,8 +56,8 @@ def incident_update_request(incident_update, incident_impact, incident_status):
             "backfilled": False,
             "created_at":
                 creation_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
-            "impact": "critical",
-            "impact_override": incident_impact.value,
+            "impact": incident_impact.value,
+            "impact_override": None,
             "monitoring_at":
                 monitoring_datetime.strftime(STATUSPAGE_DATETIME_FORMAT),
             "resolved_at":
@@ -106,10 +106,10 @@ def test_component_update(flask_client: FlaskClient,
 
 
 @pytest.mark.parametrize("incident_status", IncidentStatus)
-@pytest.mark.parametrize("incident_impact", IncidentImpactOverride)
+@pytest.mark.parametrize("incident_impact", IncidentImpact)
 def test_incident_update(flask_client: FlaskClient, incident_update_request,
-                         used_templates,
-                         request_mocker: responses.RequestsMock):
+                         used_templates):
+                         #request_mocker: responses.RequestsMock):
     response: Response = flask_client.post('/', json=incident_update_request)
 
     assert 200 <= response.status_code < 300
@@ -129,7 +129,7 @@ def test_invalid_request(flask_client: FlaskClient):
                          [ComponentStatus.DEGRADED_PERFORMANCE])
 @pytest.mark.parametrize("new_component_status", [ComponentStatus.OPERATIONAL])
 @pytest.mark.parametrize("incident_status", [IncidentStatus.MONITORING])
-@pytest.mark.parametrize("incident_impact", [IncidentImpactOverride.MAJOR])
+@pytest.mark.parametrize("incident_impact", [IncidentImpact.CRITICAL])
 @pytest.mark.parametrize("flag", ['COMPONENT_MESSAGES_ENABLED',
                                   'INCIDENT_MESSAGES_ENABLED'])
 def test_false_enabled_flags(flask_app: Flask, flask_client: FlaskClient,
@@ -152,7 +152,7 @@ def test_false_enabled_flags(flask_app: Flask, flask_client: FlaskClient,
 
 
 @pytest.mark.parametrize("incident_status", [IncidentStatus.MONITORING])
-@pytest.mark.parametrize("incident_impact", [IncidentImpactOverride.CRITICAL])
+@pytest.mark.parametrize("incident_impact", [IncidentImpact.CRITICAL])
 @pytest.mark.parametrize("env_dict", [
     {'TEMPLATE_FOLDER': test_file_folder + '/templates'}
 ])
