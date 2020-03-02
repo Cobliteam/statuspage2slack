@@ -43,4 +43,3 @@ def create_app():
     app.config.from_object(config)
     app.register_blueprint(webhook)
     return app
-
