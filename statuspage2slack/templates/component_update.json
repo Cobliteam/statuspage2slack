@@ -1,0 +1,11 @@
+{% set component_statuses = ({
+  "operational": "operational",
+  "degraded_performance": "under degraded performance",
+  "partial_outage": "under partial outage",
+  "major_outage": "under major outage",
+  "under_maintenance": "under maintenance"
+})	-%}
+{
+  "username": "IncidentBot",
+  "text": "{{ component.name }} is {{component_statuses[component.status]}}"
+}
