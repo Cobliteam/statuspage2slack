@@ -1,0 +1,2 @@
+include LICENSE
+recursive-include statuspage2slack/templates *

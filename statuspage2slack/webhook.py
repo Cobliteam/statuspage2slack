@@ -1,6 +1,9 @@
 import http
+import os
 from enum import Enum, auto
+from shutil import copytree
 
+import click
 import requests
 from dateutil import parser as datetime_parser
 from flask import current_app, request, render_template, Blueprint
@@ -12,6 +15,14 @@ class RequestType(Enum):
     UNKNOWN = auto()
     INCIDENT_UPDATE = auto()
     COMPONENT_UPDATE = auto()
+
+
+@webhook.cli.command('copy-templates')
+@click.argument('folder')
+def copy_templates(folder):
+    file_path = os.path.realpath(__file__)
+    file_folder = os.path.dirname(file_path)
+    copytree(file_folder + '/templates', folder)
 
 
 def discover_request_type(statuspage_data):

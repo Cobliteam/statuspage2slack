@@ -1,6 +1,5 @@
 import os
 
-import jinja2
 from dotenv import load_dotenv
 from flask import Flask
 
